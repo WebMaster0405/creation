@@ -7,7 +7,7 @@ const NavigationHeader = () => {
       <div className="container">
         <div className="row  align-items-center">
           <h2 className="col text-center text-sm-start text-primary fw-bold">
-            TELKOM
+            Monitering & Perfermance
           </h2>
           <div className="w-100 d-block d-sm-none"></div>
           <div className="col text-center text-sm-end">
