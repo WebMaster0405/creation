@@ -1,0 +1,54 @@
+@charset 'utf-8';
+
+@import '_variables.scss';
+@import '../../../node_modules/bootstrap/scss/_functions.scss';
+@import '../../../node_modules/bootstrap/scss/bootstrap.scss';
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+.grid-item__title {
+  font-size: 14px;
+  color: #fff;
+  padding: 4px 0;
+  text-align: center;
+  &:hover {
+    cursor: move;
+  }
+  &:focus {
+    outline: none;
+  }
+  .panel {
+    box-shadow: none;
+    border: none;
+  }
+  .panel-heading {
+    padding: 3px 0;
+    background: #171819;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .panel-body {
+    padding: 0 0 0 15px;
+    background: #171819;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.grid-item {
+  background: #f0f0f0;
+  border: 1px solid #141414;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem 1rem 0 1rem;
+}
+
+.grid-item__graph {
+  flex: 1;
+}
+
+.content {
+  min-height: 851px;
+}

@@ -1,0 +1,49 @@
+@charset "utf-8";
+
+$font-family-sans-serif: 'Quicksand', sans-serif;
+$font-family-base: 'Quicksand', sans-serif;
+$enable-responsive-font-sizes: true;
+$enable-negative-margins: true;
+
+/*
+Main Colors / Base Theme
+*/
+$primary: #2e618a;
+// $secondary: #302f2c;
+// $success: #6a8e7f;
+// $info: #38aecc;
+$warning: #e59500;
+// $danger: #ff3c3c;
+$light: #ececec;
+
+$body-bg: #00001b;
+$body-color: $light;
+
+$border-radius: 0.5rem;
+$border-radius-sm: 0.3rem;
+$border-radius-lg: 1rem;
+$border-radius-pill: 50rem;
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+);
+
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer / 4,
+  2: $spacer / 2,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: $spacer * 3.5,
+  7: $spacer * 4.5,
+  8: $spacer * 6,
+  9: $spacer * 7,
+  10: $spacer * 8,
+);
