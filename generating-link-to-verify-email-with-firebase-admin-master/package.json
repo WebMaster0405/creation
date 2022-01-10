@@ -1,0 +1,45 @@
+{
+  "name": "test-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src --extensions \".js,.ts\" --out-dir dist --copy-files --no-copy-ignored",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn  --ignore-watch node_modules --no-notify src/server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.10.5",
+    "@babel/node": "^7.10.5",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-proposal-decorators": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.7",
+    "@types/mongoose": "^5.10.3",
+    "@types/nodemailer": "^6.4.1",
+    "babel-plugin-module-resolver": "^4.0.0",
+    "babel-plugin-transform-typescript-metadata": "^0.3.0",
+    "nodemon": "^2.0.15",
+    "ts-node": "^8.10.2",
+    "ts-node-dev": "^1.0.0-pre.51",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^7.4.2",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "firebase": "^7.16.0",
+    "firebase-admin": "^9.0.0",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.5.0",
+    "sp-validators": "^1.1.2"
+  }
+}
