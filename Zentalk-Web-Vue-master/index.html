@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Zentalk-Web | Chat Application</title>
+  <meta name="language" content="en">
+  <meta name="coverage" content="Worldwide">
+  <meta name="page-type" content="Chat Application">
+  <link rel="icon" type="image/png" href="zentachainlogoblack.png" alt="Zentalk_Web_Logo">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Zentalk Web is a End 2 End Hybrid Encrypted Chat Application">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="/styles.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="vue-instance">
+    <div class="chat-container full-width" ref="chatContainer">
+      <div class="message-list">
+        <div class="message full-width green" v-for="message in messages">
+          <p>
+            <span
+              v-bind:class="(message.sender == originPublicKey) ? 'green' : 'red'">{{ getKeySnippet(message.sender) }}</span>
+              &#10148; {{ message.text }} 
+          </p>
+        </div>
+      </div>
+
+    </div>
+    <div class="info-container full-width">
+      <div id="chatjoin">
+        <h4>CHATROOM</h4>
+
+        <div class="room-select">
+          <input type="text" class="room-id" placeholder="Room Name" id="room-id" v-model="pendingRoom"@keyup.enter="joinRoom()">
+        </div>
+
+        <div class="room-btn">
+          <input class="join-button" type="submit" v-on:click="joinRoom()" value="JOIN">
+        </div>
+
+        <div class="divider"></div>
+        <div class="notification-list" ref="notificationContainer">
+          <div class="notification full-width" v-for="notification in notifications">
+            <div class="notification-timestamp">{{ notification.timestamp }}</div>
+            <div class="notification-message">{{ notification.message }}</div>
+          </div>
+        </div>
+
+        <div class="flex-fill"></div>
+        <div class="divider"></div>
+        <div class="keys full-width">
+          <div class="keyId" v-if="destinationPublicKey">
+            <h3>THEIR PUBLIC KEY & IDENTIFICATION - {{ getKeySnippet(destinationPublicKey) }}</h3>
+            <p>{{ destinationPublicKey }}</p>
+          </div>
+          <h4 v-else style="text-align:center;">Waiting for second user to join room...</h4>
+          <div class="dividerkey"></div>
+          <div class="key green" v-if="originPublicKey">
+            <h3>YOUR PUBLIC KEY & IDENTIFICATION - {{ getKeySnippet(originPublicKey) }}</h3>
+            <p>{{ originPublicKey }}</p>
+          </div>
+          <div class="keypair-loader full-width" v-else>
+            <div class="center-x loader"></div>
+            <h2 class="center-text">Zentalk Generating Keypair...</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-bar full-width" id="message-input">
+      <div class="gradient-border">
+        <input class="message-input" type="text" placeholder="Your Message..." v-model="draft" @keyup.enter="sendMessage()">
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.1/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.slim.js" integrity="sha256-Dul4c09cdrWKXVtallPxF558lwxMwCC8dXJdZ0PVW54=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.1/immutable.min.js"></script>
+    <script src="/page.js"></script>
+
+</body>
+
+</html>
