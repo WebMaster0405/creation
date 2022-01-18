@@ -1,0 +1,7 @@
+body {
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #000 0%, #100b0d 99%);
+}
+img {
+  display: none;
+}
