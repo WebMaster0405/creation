@@ -2,20 +2,30 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <title>CodePen - Volumetric Light Scattering in three.js</title>
+  <title>lighting object</title>
   <link rel="stylesheet" href="./style.css">
+  <style>   
+    body {
+      width: 100%;
+      height: 100%;
+       
+      background: -webkit-radial-gradient(#0dcce1 0%,#1b1d2e 100%); /* Chrome10-25,Safari5.1-6 */
+      overflow: hidden;
 
+    }
+  </style>
 </head>
 <body>
+  <div id="canvas"></div>
 <!-- partial:index.partial.html -->
 
-<!-- partial -->
+  <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js'></script>
-<script src='https://abberg.github.io/lib/shaders/CopyShader.js'></script>
-<script src='https://abberg.github.io/lib/postprocessing/EffectComposer.js'></script>
-<script src='https://abberg.github.io/lib/postprocessing/RenderPass.js'></script>
-<script src='https://abberg.github.io/lib/postprocessing/ShaderPass.js'></script><script  src="./script.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js'></script>
+  <script src='https://abberg.github.io/lib/shaders/CopyShader.js'></script>
+  <script src='https://abberg.github.io/lib/postprocessing/EffectComposer.js'></script>
+  <script src='https://abberg.github.io/lib/postprocessing/RenderPass.js'></script>
+  <script src='https://abberg.github.io/lib/postprocessing/ShaderPass.js'></script><script  src="./script.js"></script>
 
 </body>
 </html>

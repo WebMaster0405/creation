@@ -1,25 +1,3 @@
-/*
-  TODO:
-    - Cleanup code
-    - Generate different mazes for each face
-    - Try different color schemes
-    - Create UI Menus
-    - Optimize for mobile
-*/
-
-/*
-  Resources:
-    - Volumetric Light Scattering in three.js
-    https://medium.com/@andrew_b_berg/volumetric-light-scattering-in-three-js-6e1850680a41
-    - Postprocessing Unreal Bloom
-    https://threejs.org/examples/#webgl_postprocessing_unreal_bloom
-    - THREE Mesh Line
-    https://github.com/spite/THREE.MeshLine
-    - Javascript 2D Perlin & Simplex noise functions
-    https://github.com/josephg/noisejs
-*/
-
-const CUBE_SIZE = 10;
 const MAP_WIDTH = 28;
 const MAP_HEIGHT = 31;
 
@@ -234,146 +212,6 @@ class Particles {
     }
   }}
 
-
-class Trails {
-  constructor(map) {
-    this.group = new THREE.Object3D();
-    this.position = new THREE.Vector3();
-    this.map = map;
-    this.maxPositions = 25;
-    this.history = [];
-    this.junctionTiles = [];
-    this.init();
-    this.spawn();
-  }
-
-  init() {
-    this.geometry = new THREE.Geometry();
-    const mat = new MeshLineMaterial({ color: new THREE.Color(0xffffff), side: THREE.DoubleSide });
-    this.line = new MeshLine();
-    this.mesh = new THREE.Mesh(this.line.geometry, mat);
-    this.group.add(this.mesh);
-    for (let i = 0; i < this.maxPositions; i++) {
-      this.geometry.vertices.push(new THREE.Vector3());
-    }
-    this.map.tiles.forEach((t, idx) => {
-      if (t === MAP_JUNCTION) {
-        this.junctionTiles.push(idx);
-      }
-    });
-    this.light = new THREE.PointLight(0x00ff00, 1, 5);
-    this.group.add(this.light);
-    //this.debug();
-  }
-
-  spawn() {
-    const { position, line } = this;
-    const { vertices } = this.geometry;
-    const wayPoints = this.getWayPoints();
-    vertices.forEach(v => v.copy(wayPoints[0]));
-    this.position.copy(wayPoints[0]);
-    this.light.position.copy(wayPoints[0]);
-    line.setGeometry(this.geometry, p => p * 0.5);
-    this.startPath(wayPoints);
-  }
-
-  getTileDirections(x, y) {
-    const { map } = this;
-    return [UP, RIGHT, DOWN, LEFT].filter(d => {
-      const tile = map.getTileAt(x, y, d);
-      return tile !== undefined && tile === MAP_DIRECTION;
-    });
-  }
-
-  debug() {
-    this.junctionTiles.forEach(t => {
-      const [x, y] = this.map.getCoordsFromIndex(t);
-      Utils.AddDot(this.group, this.scaleTilePosition(new THREE.Vector3(x, y, 0)));
-    });
-  }
-
-  scaleTilePosition(position) {
-    const { map } = this;
-    const tileScaleX = CUBE_SIZE / map.width;
-    const tileScaleY = CUBE_SIZE / map.height;
-    position.set(
-    (position.x + tileScaleX * 1.5) * tileScaleX,
-    (position.y + tileScaleX * 1.5) * tileScaleY, 0);
-    return position;
-  }
-
-  getWayPoints() {
-    const { map, junctionTiles: jTiles } = this;
-    const startTile = jTiles[~~(Math.random() * jTiles.length)];
-    let [xCurrent, yCurrent] = map.getCoordsFromIndex(startTile);
-    const visitedTiles = [];
-    let insert = true;
-    while (insert) {
-      visitedTiles.push(map.getIndexFromCoords(xCurrent, yCurrent));
-
-      // find available directions from current coords
-      const directions = this.getTileDirections(xCurrent, yCurrent);
-
-      // get all neighbours for all posibile directions
-      const neighbours = directions.
-      map(d => map.getNearestNeighborFrom(xCurrent, yCurrent, d, MAP_JUNCTION))
-
-      // exclude already visited ones
-      .filter(n => visitedTiles.indexOf(map.getIndexFromCoords(n[0], n[1])) === -1);
-
-      // pick one from available neighbours
-      const nPick = neighbours[~~(Math.random() * neighbours.length)];
-      if (nPick) {
-        [xCurrent, yCurrent] = nPick;
-        insert = true;
-      } else {
-        insert = false;
-      }
-    }
-    const tileScaleX = map.width / CUBE_SIZE * 0.1;
-    const tileScaleY = map.height / CUBE_SIZE * 0.1;
-    return visitedTiles.map(idx => {
-      let [x, y] = map.getCoordsFromIndex(idx);
-      return this.scaleTilePosition(new THREE.Vector3(x, y, 0));
-    });
-  }
-
-  updatePosition() {
-    const { position } = this;
-    this.light.position.copy(position);
-    this.line.advance(position);
-  }
-
-  startPath(waypoints) {
-    const { position } = this;
-    this.timeline = new TimelineMax({ onComplete: () => {
-        TweenMax.to(this.position, 1, {
-          onUpdate: this.updatePosition.bind(this),
-          onComplete: () => {
-            setTimeout(this.spawn.bind(this), Math.random() * 2500 + 500);
-          } });
-
-      } });
-    waypoints.forEach((pos, idx) => {
-      this.timeline.to(this.position, 0.25, {
-        x: pos.x,
-        y: pos.y,
-        onUpdate: this.updatePosition.bind(this),
-        ease: Linear.easeNone });
-
-
-      if (idx === 0) {
-        this.timeline.to(this.light, 0.2, { power: 1.5 * 4 * Math.PI });
-      }
-
-      if (idx === waypoints.length - 1) {
-        this.timeline.to(this.light, 0.4, { power: 0.1 * 4 * Math.PI }, '-=0.45');
-      }
-
-    });
-  }}
-
-
 class App {
 
   constructor() {
@@ -382,69 +220,32 @@ class App {
     this.mouse = new THREE.Vector2(0, 0);
     this.init();
     this.initLights();
-    this.initMazeMesh();
-    this.initTrails();
     this.initParticles();
-    this.initGodRays();
+    this.initGodRays(1);
     this.setupComposer();
     this.setupProstprocessing();
-    this.addRenderTargetImage();
     this.attachEvents();
     this.updateSize();
     this.onFrame(0);
-    //this.initHelpers();
-    //this.addGUI();
+    this.initHelpers();
   }
-
-  addGUI() {
-    this.gui = new dat.GUI();
-    const setCubeColor = c => {this.mazeMesh.material.color.setHex(c.replace('#', '0x'));};
-    const setOutterLightColor = c => {this.outterLight.color.setHex(c.replace('#', '0x'));};
-    const setLightSphereColor = c => {this.lightSphere.material.color.setHex(c.replace('#', '0x'));};
-    this.cubeColor = "#4583dc";
-    this.outterLightColor = "#c743ff";
-    this.lightSphereColor = '#ffd242';
-    this.gui.addColor(this, 'cubeColor').onChange(setCubeColor);
-    this.gui.addColor(this, 'outterLightColor').onChange(setOutterLightColor);
-    this.gui.addColor(this, 'lightSphereColor').onChange(setLightSphereColor);
-  }
-
   init() {
     const { innerWidth: w, innerHeight: h } = window;
     const aspect = w / h;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(w, h);
-    this.renderer.gammaInput = true;
+    this.renderer.setClearColor(0x000000, 0); 
+    // this.renderer.gammaInput = true;
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-    this.camera.position.set(14, 14, 14);
+    this.scene.background = new THREE.Color( 0x0f3440 );
+    this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
+    this.camera.position.set( 10, 40, 10 );
+    // this.camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 10000);
+    // this.camera.position.set(14, 14, 30);
     this.clock = new THREE.Clock();
-    document.body.appendChild(this.renderer.domElement);
-  }
-
-  initTrails() {
-    const { scene } = this;
-    const map = new BoardMap('#map-test');
-
-    const trails = [];
-
-    const t1 = new Trails(map);
-    t1.group.position.set(-CUBE_SIZE / 2, CUBE_SIZE / 2 + 0.2, -CUBE_SIZE / 2);
-    t1.group.rotation.x = Math.PI / 2;
-    scene.add(t1.group);
-
-    const t2 = new Trails(map);
-    t2.group.position.set(CUBE_SIZE / 2, -CUBE_SIZE / 2, -CUBE_SIZE / 2);
-    t2.group.rotation.x = Math.PI / 2;
-    t2.group.rotation.y = Math.PI / 2;
-    scene.add(t2.group);
-
-    const t3 = new Trails(map);
-    t3.group.position.set(-CUBE_SIZE / 2, -CUBE_SIZE / 2 - 0.1, CUBE_SIZE / 2);
-    scene.add(t3.group);
-
-    this.trails = trails;
+    document.getElementById('canvas').appendChild(this.renderer.domElement);
+    
   }
 
   initParticles() {
@@ -456,16 +257,31 @@ class App {
   }
 
   initLights() {
+    
     const { scene } = this;
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
     const innerLight = new THREE.PointLight(0xfffff);
     const outterLight = new THREE.PointLight(0xc743ff, 3, 25);
     outterLight.position.set(14, 14, 14);
     this.outterLight = outterLight;
-    //Utils.AddDot(scene, pointLight.position);
     scene.add(innerLight);
     scene.add(outterLight);
     scene.add(ambientLight);
+
+    const spotLight = new THREE.SpotLight( 0xffffff, 1 );
+    spotLight.position.set( 15, 40, 35 );
+    spotLight.angle = Math.PI / 4;
+    spotLight.penumbra = 0.1;
+    spotLight.decay = 2;
+    spotLight.distance = 200;
+
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 512;
+    spotLight.shadow.mapSize.height = 512;
+    spotLight.shadow.camera.near = 10;
+    spotLight.shadow.camera.far = 200;
+    spotLight.shadow.focus = 1;
+    scene.add( spotLight );
   }
 
   setupProstprocessing() {
@@ -479,20 +295,15 @@ class App {
     composer.addPass(this.bloomPass);
   }
 
-  initGodRays() {
-    const { scene, mazeMesh } = this;
-    const geoSphere = new THREE.BoxGeometry(CUBE_SIZE * 0.8, CUBE_SIZE * 0.8, CUBE_SIZE * 0.8);
+  initGodRays(r) {
+    const { scene } = this;
+    const geoSphere = new THREE.SphereGeometry(r, 32, 16);
     const matSphere = new THREE.MeshBasicMaterial({ color: 0xffa602, transparent: true });
     this.lightSphere = new THREE.Mesh(geoSphere, matSphere);
     this.lightSphere.layers.set(1);
     this.lightSphere.material.opacity = 1;
     scene.add(this.lightSphere);
 
-    const matOcclusion = new THREE.MeshBasicMaterial({ color: 0x0 });
-    this.occlusionMesh = new THREE.Mesh(mazeMesh.geometry, matOcclusion);
-    this.occlusionMesh.position.z = 0;
-    this.occlusionMesh.layers.set(1);
-    scene.add(this.occlusionMesh);
   }
 
   getScriptContent(id) {
@@ -541,66 +352,6 @@ class App {
     //addPass.renderToScreen = true;
   }
 
-  addRenderTargetImage() {
-    const mat = new THREE.ShaderMaterial({
-      uniforms: {
-        tDiffuse: { value: null },
-        vertexShader: this.getScriptContent('#shader-passthrough-vertex'),
-        fragmentShader: this.getScriptContent('#shader-passthrough-fragment') } });
-
-
-    mat.uniforms.tDiffuse.value = this.occlusionRenderTarget.texture;
-    const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), mat);
-    mesh.visible = false;
-    this.composer.passes[1].scene.add(mesh);
-  }
-
-  initMazeMesh() {
-    const { scene } = this;
-    const geo = new THREE.Geometry();
-
-    const up = this.getGamePlaneGeometry('#map-test');
-    up.position.y = CUBE_SIZE / 2;
-    up.updateMatrix();
-    geo.merge(up.geometry, up.matrix);
-
-    const right = this.getGamePlaneGeometry('#map-test');
-    right.position.x = CUBE_SIZE / 2;
-    right.rotation.z = Math.PI / 2;
-    right.updateMatrix();
-    geo.merge(right.geometry, right.matrix);
-
-    const front = this.getGamePlaneGeometry('#map-test');
-    front.rotation.x = Math.PI / 2;
-    front.position.z = CUBE_SIZE / 2 - 0.25;
-    front.updateMatrix();
-    geo.merge(front.geometry, front.matrix);
-
-    const left = this.getGamePlaneGeometry('#map-test');
-    left.rotation.z = Math.PI / 2;
-    left.position.x = -CUBE_SIZE / 2 + 0.25;
-    left.updateMatrix();
-    geo.merge(left.geometry, left.matrix);
-
-    const down = this.getGamePlaneGeometry('#map-test');
-    down.position.y = -CUBE_SIZE / 2;
-    down.updateMatrix();
-    geo.merge(down.geometry, down.matrix);
-
-    const back = this.getGamePlaneGeometry('#map-test');
-    back.rotation.x = Math.PI / 2;
-    back.position.z = -CUBE_SIZE / 2;
-    back.updateMatrix();
-    geo.merge(back.geometry, back.matrix);
-
-
-    const mat = new THREE.MeshPhongMaterial({
-      color: 0x4583dc });
-
-    this.mazeMesh = new THREE.Mesh(geo, mat);
-    this.mazeMesh.updateMatrix();
-    scene.add(this.mazeMesh);
-  }
 
   getGamePlaneGeometry(mapId) {
     const boardMap = new BoardMap(mapId);
@@ -611,23 +362,34 @@ class App {
   attachEvents() {
     window.addEventListener("resize", this.updateSize.bind(this));
     window.addEventListener("mousemove", this.onMouseMove.bind(this));
+    window.addEventListener("click", this.onMouseClick.bind(this));
   }
 
+  onMouseClick(event){
+    console.log("er")
+  }
   onMouseMove(event) {
     this.mouse.x = event.clientX / window.innerWidth * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  }
+  onMouseClick(event) {
+    const { scene, camera, renderer } = this;
+    this.initGodRays(10);
+    
   }
 
   initHelpers() {
     const { scene, camera, renderer } = this;
     const c = new THREE.OrbitControls(camera, renderer.domElement);
+    c.addEventListener( 'change', renderer );
+    c.enablePan = false;
     c.enableDamping = true;
     c.dampingFactor = 0.25;
     c.minDistance = 1;
-    c.maxDistance = 100;
+    c.maxDistance = 10000;
     this.orbitControls = c;
-    this.axesHelper = new THREE.AxesHelper(500);
-    //scene.add(this.axesHelper);
+    // this.axesHelper = new THREE.AxesHelper(1500);
+    // scene.add(this.axesHelper);
   }
 
   updateSize() {
@@ -646,10 +408,14 @@ class App {
     const { uniforms: u } = this.occlusionPass;
     const n0 = (noise.perlin2(time * 0.0005, 0) + 1) * 0.5;
     const n1 = (noise.perlin2(0, time * 0.0005) + 1) * 0.5;
-    u.exposure.value = THREE.Math.lerp(0.05, 0.21, n0);
-    u.decay.value = THREE.Math.lerp(0.95, 0.98, n1);
-    u.density.value = THREE.Math.lerp(0.2, 0.4, n0);
-    u.weight.value = THREE.Math.lerp(0.1, 0.7, n1);
+    // u.exposure.value = THREE.Math.lerp(0.05, 0.21, n0);
+    // u.decay.value = THREE.Math.lerp(0.95, 0.98, n1);
+    // u.density.value = THREE.Math.lerp(0.2, 0.4, n0);
+    // u.weight.value = THREE.Math.lerp(0.1, 0.7, n1);
+    u.exposure.value = THREE.Math.lerp(0.05, 0.21, 0.45);
+    u.decay.value = THREE.Math.lerp(0.95, 0.98, 0.45);
+    u.density.value = THREE.Math.lerp(0.2, 0.4, 0.45);
+    u.weight.value = THREE.Math.lerp(0.1, 0.7, 0.45);
   }
 
   updateLightPosition(time) {
@@ -663,14 +429,14 @@ class App {
     TweenMax.to(this.camera.position, 1.5, {
       x: 14 + mouse.x * 2.5,
       y: 14 + mouse.y * 2.5,
-      z: 14 + mouse.x * mouse.y });
+      z: 30 + mouse.x * mouse.y });
 
   }
 
   onFrame(time) {
     const { renderer, scene, camera, clock } = this;
     requestAnimationFrame(this.onFrame.bind(this));
-    //this.orbitControls.update();
+    this.orbitControls.update();
     camera.layers.set(1);
     this.updateCameraTilt();
     this.particles.update(clock.getDelta());
@@ -681,8 +447,9 @@ class App {
     camera.layers.set(0);
     camera.lookAt(scene.position);
     this.composer.render();
-    //renderer.render(scene, camera);
-  }}
+    // renderer.render(scene, camera);
+  }
+}
 
 
 

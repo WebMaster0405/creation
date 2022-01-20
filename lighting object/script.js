@@ -110,10 +110,14 @@ THREE.PassThroughShader = {
   
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  renderer = new THREE.WebGLRenderer();
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
-  document.body.appendChild( renderer.domElement );
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ReinhardToneMapping;
+  renderer.toneMappingExposure = 3;
+  renderer.domElement.style.background = 'linear-gradient( 180deg, rgba( 0,0,0,1 ) 0%, rgba( 128,128,255,1 ) 100% )';
+  document.getElementById('canvas').appendChild(renderer.domElement);
 
   function setupScene(){
     var ambientLight,
@@ -131,19 +135,6 @@ THREE.PassThroughShader = {
     lightSphere = new THREE.Mesh( geometry, material );
     lightSphere.layers.set( OCCLUSION_LAYER );
     scene.add( lightSphere );
-
-    geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
-    material = new THREE.MeshPhongMaterial( { color: 0xe74c3c } );
-    box = new THREE.Mesh( geometry, material );
-    box.position.z = 2;
-    scene.add( box );
-    
-    material = new THREE.MeshBasicMaterial( { color:0x000000 } );
-    occlusionBox = new THREE.Mesh( geometry, material);
-    occlusionBox.position.z = 2;
-    occlusionBox.layers.set( OCCLUSION_LAYER );
-    scene.add( occlusionBox );
-    
     camera.position.z = 6;
   }
 
@@ -174,18 +165,7 @@ THREE.PassThroughShader = {
   }
   
   function update(){
-    var radius = 2.5,
-        xpos = Math.sin(angle) * radius,
-        zpos = Math.cos(angle) * radius;
-
-    box.position.set( xpos, 0, zpos);
-    box.rotation.x += 0.01;
-    box.rotation.y += 0.01;
-    
-    occlusionBox.position.copy(box.position);
-    occlusionBox.rotation.copy(box.rotation);
-    
-    angle += 0.02;
+   
   }
 
   function render(){
