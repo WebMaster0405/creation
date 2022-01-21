@@ -1,31 +1,101 @@
 <!DOCTYPE html>
 <html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>lighting object</title>
-  <link rel="stylesheet" href="./style.css">
-  <style>   
-    body {
-      width: 100%;
-      height: 100%;
-       
-      background: -webkit-radial-gradient(#0dcce1 0%,#1b1d2e 100%); /* Chrome10-25,Safari5.1-6 */
-      overflow: hidden;
+  <head>
+    <meta charset="UTF-8">
+    <title>Dynamic lighting</title>
+    
+    <script>
+      if (window.location.href.indexOf("fullcpgrid") > -1) {
+      	document.addEventListener('DOMContentLoaded', function() {
+      		const original = document.createElement('iframe');
+      		original.style.display = 'none';
+      		document.body.appendChild(original);
+      		window.requestAnimationFrame = original.contentWindow.requestAnimationFrame;
+      	}, false);
+      }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="./style.css">
 
-    }
-  </style>
-</head>
+  </head>
 <body>
-  <div id="canvas"></div>
+  <div>
+      <svg width="664" height="620" viewBox="0 0 664 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path opacity="0.5" d="M384.578 2.07054C131.973 -4.46359 43.5859 139.277 11.9934 289.571C-19.5992 439.865 13.4233 592.795 195.131 616.28C346.709 635.871 547.308 547.941 630.898 348.378C713.003 152.357 637.183 8.60467 384.578 2.07054Z" stroke="block" stroke-width="3"/>
+      </svg>
+    </div>
 <!-- partial:index.partial.html -->
+  <script type="x-shader/x-vertex" id="shader-passthrough-vertex">
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  </script>
 
-  <!-- partial -->
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js'></script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js'></script>
-  <script src='https://abberg.github.io/lib/shaders/CopyShader.js'></script>
-  <script src='https://abberg.github.io/lib/postprocessing/EffectComposer.js'></script>
-  <script src='https://abberg.github.io/lib/postprocessing/RenderPass.js'></script>
-  <script src='https://abberg.github.io/lib/postprocessing/ShaderPass.js'></script><script  src="./script.js"></script>
+  <script type="x-shader/x-fragment" id="shader-passthrough-fragment">
+    uniform sampler2D tDiffuse;
+    varying vec2 vUv;
+    void main() {
+      gl_FragColor = texture2D( tDiffuse, vec2( vUv.x, vUv.y ) );
+    }
+  </script>
+
+  <script type="x-shader/x-fragment" id="shader-volumetric-light-fragment">
+    varying vec2 vUv;
+    uniform sampler2D tDiffuse;
+    uniform vec2 lightPosition;
+    uniform float exposure;
+    uniform float decay;
+    uniform float density;
+    uniform float weight;
+    uniform int samples;
+    const int MAX_SAMPLES = 100;
+    void main()
+    {
+      vec2 texCoord = vUv;
+      vec2 deltaTextCoord = texCoord - lightPosition;
+      deltaTextCoord *= 1.0 / float(samples) * density;
+      vec4 color = texture2D(tDiffuse, texCoord);
+      float illuminationDecay = 1.0;
+      for(int i=0; i < MAX_SAMPLES; i++) {
+        if(i == samples) {
+          break;
+        }
+        texCoord -= deltaTextCoord;
+        vec4 sample = texture2D(tDiffuse, texCoord);
+        sample *= illuminationDecay * weight;
+        color += sample;
+        illuminationDecay *= decay;
+      }
+      gl_FragColor = color * exposure;
+    }
+  </script>
+
+  <script type="x-shader/x-fragment" id="shader-additive-fragment">
+    uniform sampler2D tDiffuse;
+    uniform sampler2D tAdd;
+    varying vec2 vUv;
+    void main() {
+      vec4 color = texture2D( tDiffuse, vUv );
+      vec4 add = texture2D( tAdd, vUv );
+      gl_FragColor = color + add;
+    }
+  </script>
+    
+    
+
+  <img id="map-test" src="data:image/gif;base64,R0lGODdhHAAfAPIAAAAAAAD/AAAA//8AACZFySZFySZFySZFySH5BAEAAAQALAAAAAAcAB8AAAOwOLrc/iMIAISkNahL7cyKwIhj2JDmADArq7QLrKZ0itYk5+0SL3gdzeBGupWGR2IteeQAhD3oTxp8GIsnB4YyY7q24FUrOp2+VGFMF8VNibcObBhJZ4GjaHh0nkXOsQ1gaxAkb2liGx9bFmeHXC1GC4V5bUcyLnUMOk6MEYpAIJlXS0qifaOSiVAZZT5Pql6RNkt0gHGzCxJ4nq+enWRCsqmZt8SBtE2KYK5pnRDP0AkAOw==" />
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/92/three.js'></script>
+  <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/OrbitControls.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js'></script>
+  <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/EffectComposer.js'></script>
+  <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/UnrealBloomPass.js'></script>
+  <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/perlin.js'></script>
+  <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/204379/THREE.MeshLine.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js'></script>
+  <!-- <script  src="./script.js"></script> -->
 
 </body>
 </html>
