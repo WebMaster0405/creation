@@ -447,6 +447,7 @@ class App {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(w, h);
     // this.renderer.gammaInput = true;
+    // this.renderer.domElement.style.background = '#021645';
     this.renderer.domElement.style.background = 'radial-gradient(71.29% 71.29% at 50% 50%, #FFFFFF 0%, #F8F2D7 2.79%, #00B9C6 36.77%, #214269 77.1%, #0E1E31 99.48%)';
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
@@ -561,7 +562,7 @@ class App {
 
   initLights() {
     const { scene } = this;
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+    const ambientLight = new THREE.AmbientLight(0x895612, 0.15);
     const innerLight = new THREE.PointLight(0xfffff);
     const outterLight = new THREE.PointLight(0xc743ff, 3, 25);
     outterLight.position.set(14, 14, 14);
@@ -710,16 +711,16 @@ class App {
 
   updateLightPosition(time) {
     const { lightSphere } = this;
-    // const n0 = (noise.perlin2(time * 0.0005, 0) + 1) * 0.5;
-    // lightSphere.position.y = THREE.Math.lerp(-1, 1, n0);
+    const n0 = (noise.perlin2(time * 0.0005, 0) + 1) * 0.3;
+    lightSphere.position.y = THREE.Math.lerp(-1, 1, n0);
   }
 
   updateCameraTilt() {
     const { camera, mouse } = this;
-    TweenMax.to(this.camera.position, 100, {
-      x: mouse.x * 550,
-      y: mouse.y * 550,
-      z: mouse.x * mouse.y * 300 ,
+    TweenMax.to(this.camera.position, 30, {
+      x: mouse.x * 30,
+      y: mouse.y * 30,
+      z: mouse.x * mouse.y * 0.1 ,
     });
 
   }
@@ -728,7 +729,7 @@ class App {
     const { renderer, scene, camera, clock } = this;
 
     requestAnimationFrame(this.onFrame.bind(this));
-    this.orbitControls.update();
+    //this.orbitControls.update();
     camera.layers.set(1);
     // this.updateCameraTilt();
     this.particles.update(clock.getDelta());
