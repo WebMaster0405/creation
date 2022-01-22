@@ -157,6 +157,7 @@ class Particles {
     this.clusters = [];
     this.scales = [];
     this.initParticles();
+    this.ripples = [];
   }
 
   initParticles() {
@@ -165,16 +166,19 @@ class Particles {
       const cluster = {
         scale: i + 2,
         speed: THREE.Math.randFloat(0.5, 1.8),
-        points: this.getCluster(100) };
+        points: this.getCluster(100) 
+      };
 
       this.clusters.push(cluster);
     }
+    
+    
   }
 
   getCluster(count) {
     const geo = new THREE.Geometry();
     const mat = new THREE.PointsMaterial({
-      color: 0xffd242,
+      color: 0xffffff,
       size: THREE.Math.randFloat(0.1, 0.25),
       map: this.texture,
       sizeAttenuation: true,
@@ -210,10 +214,9 @@ class Particles {
         const opacity = THREE.Math.lerp(1, 0, 1 - (12 - cluster.scale) / 4);
         cluster.points.material.opacity = opacity;
       }
-
-
     }
-  }}
+  }
+}
 
 
 class Trails {
@@ -358,19 +361,41 @@ class Trails {
 class Ripples {
   constructor(){
     this.r = 0;
-    this.group = [];
     this.count = 0;
-    this.updateRippleLine();
+    this.initRippleLine()
   }
 
   initRippleLine(){
-
-
-    
+    this.ripple_group = new THREE.Group();
+    let ripple_line = this.generateRippleLine();
+    this.ripple_group.add(ripple_line);
+    return ripple_line;
   }
 
-  updateRippleLine(){
+  generateRippleLine(){
+    const circleRadius = 30;
+    const circleShape = new THREE.Shape();
+    circleShape.moveTo(0, circleRadius);
+    circleShape.quadraticCurveTo( circleRadius, circleRadius, circleRadius, 0 );
+    circleShape.quadraticCurveTo( circleRadius, - circleRadius, 0, - circleRadius );
+    circleShape.quadraticCurveTo( - circleRadius, - circleRadius, - circleRadius, 0 );
+    circleShape.quadraticCurveTo( - circleRadius, circleRadius, 0, circleRadius );
+    const points = circleShape.getPoints();
+    const spacedPoints = circleShape.getSpacedPoints( 20 );
 
+    const geometryPoints = new THREE.BufferGeometry().setFromPoints( points );
+    const geometrySpacedPoints = new THREE.BufferGeometry().setFromPoints( spacedPoints );
+
+    // solid line
+
+    const line = new THREE.Line( geometryPoints, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+    line.position.set( 0, 0, 0, -125 );
+    line.rotation.set( 0, 0, 60 );
+    line.scale.set( 0.2, 0.2, 0.2 );
+    return line;
+  }
+  update(delta){
+    
   }
 }
 class App {
@@ -381,23 +406,21 @@ class App {
     this.mouse = new THREE.Vector2(0, 0);
     this.orbitControls = null;
     this.renderer;
-
-    this.group;
-    this.count = 0;
-    this.r = 0;
+    this.carmera_zoom = false;
 
     this.init();
     this.initHelpers();
+    this.attachEvents();
     this.initLights();
     this.initMazeMesh();
     // this.initTrails();
     this.initParticles();
-    this.initRippleLine();
+    // this.initRippleLine();
     this.initGodRays();
     this.setupComposer();
     this.setupProstprocessing();
     this.addRenderTargetImage();
-    this.attachEvents();
+    
     this.updateSize();
     this.onFrame(0);
     this.addGUI();
@@ -429,8 +452,8 @@ class App {
     this.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
     this.camera.position.set(14, 14, 14);
     this.clock = new THREE.Clock();
-    document.body.appendChild(this.renderer.domElement);
-
+    // document.body.appendChild(this.renderer.domElement);
+    document.getElementById("main").appendChild(this.renderer.domElement);
        
     var domeGeometry = new THREE.SphereGeometry(300, 300,300);
 
@@ -472,21 +495,68 @@ class App {
 
     // var dome = new THREE.Mesh(domeGeometry, m);
     // this.scene.add(dome);
+
+   
   }
 
+  initHelpers() {
+    const { scene, camera, renderer } = this;
+    const c = new THREE.OrbitControls(this.camera, this.renderer.domElement);
 
+    c.autoRotate = true;
+    c.autoRotateSpeed = 0.03;
+
+    c.enableDamping = true;
+    c.dampingFactor = 0.25;
+    c.minDistance = 1;
+    c.maxDistance = 1000;
+    this.orbitControls = c;
+
+    // this.axesHelper = new THREE.AxesHelper(500);
+    // scene.add(this.axesHelper);
+  }
+  attachEvents() {
+    window.addEventListener("resize", this.updateSize.bind(this));
+    window.addEventListener("mousemove", this.onMouseMove.bind(this));
+    window.addEventListener("click", this.onMouseClick.bind(this));
+  }
+
+  onMouseMove(event) {
+    this.mouse.x = event.clientX / window.innerWidth * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  }
+
+  onMouseClick(event){
+    const { scene, camera, renderer } = this;
+    this.carmera_zoom = true;
+    // camera.fov = camera.fov * 100;
+    // camera.updateProjectionMatrix();
+    // this.updateCameraTilt();
+    
+  }
+  carmeraZoom (time){
+    const { scene, camera, renderer } = this;
+    if(this.carmera_zoom){
+      camera.zoom += 0.15;
+      camera.updateProjectionMatrix();
+ 
+    }
+  }
   initParticles() {
     const { scene } = this;
     this.particles = new Particles();
     this.particles.clusters.forEach(cluster => {
       scene.add(cluster.points);
     });
+    this.particles.ripples.forEach(ripple => {
+      scene.add(ripple);
+    });
   }
 
   initRippleLine(){
     const {scene} = this;
-    this.rippleLines = new Ripples();
-    // scene.add(this.rippleLines);
+    // this.rippleLines = new Ripples();
+    // scene.add(this.rippleLines.initRippleLine());
   }
 
   initLights() {
@@ -502,27 +572,6 @@ class App {
     scene.add(ambientLight);
   
   }
-
-  initGodRays() {
-    const { scene, mazeMesh } = this;
-    const geoSphere = new THREE.SphereGeometry(1, 32, 16);
-    const matSphere = new THREE.MeshBasicMaterial({ color: 0xe6e2d8, transparent: true });
-    this.lightSphere = new THREE.Mesh(geoSphere, matSphere);
-    this.lightSphere.layers.set(1);
-    this.lightSphere.material.opacity = 1;
-    scene.add(this.lightSphere);
-
-    // const matOcclusion = new THREE.MeshBasicMaterial({ color: 0x0 });
-    // this.occlusionMesh = new THREE.Mesh(mazeMesh.geometry, matOcclusion);
-    // this.occlusionMesh.position.z = 0;
-    // this.occlusionMesh.layers.set(1);
-    // scene.add(this.occlusionMesh);
-  }
-
-  getScriptContent(id) {
-    return document.querySelector(id).textContent;
-  }
-
   setupProstprocessing() {
     const { composer } = this;
     const { innerWidth: w, innerHeight: h } = window;
@@ -540,6 +589,28 @@ class App {
     composer.addPass(this.bloomPass);
   }
 
+  initGodRays() {
+    const { scene, mazeMesh } = this;
+    const geoSphere = new THREE.SphereGeometry(0.5, 32, 16);
+    const matSphere = new THREE.MeshBasicMaterial({ color: 0xe6e2d8, transparent: true });
+    this.lightSphere = new THREE.Mesh(geoSphere, matSphere);
+    this.lightSphere.layers.set(1);
+    this.lightSphere.material.opacity = 1;
+    scene.add(this.lightSphere);
+
+    // const matOcclusion = new THREE.MeshBasicMaterial({ color: 0x0 });
+    // this.occlusionMesh = new THREE.Mesh(mazeMesh.geometry, matOcclusion);
+    // this.occlusionMesh.position.z = 0;
+    // this.occlusionMesh.layers.set(1);
+    // scene.add(this.occlusionMesh);
+  }
+
+  getScriptContent(id) {
+    return document.querySelector(id).textContent;
+  }
+
+  
+
   setupComposer() {
     const { renderer, camera, scene } = this;
     const { innerWidth: w, innerHeight: h } = window;
@@ -551,10 +622,10 @@ class App {
       uniforms: {
         tDiffuse: { value: null },
         lightPosition: { value: new THREE.Vector2(0.5, 0.5) },
-        exposure: { value: 0.41 },
-        decay: { value: 0.95 },
+        exposure: { value: 0.8 },
+        decay: { value: 0.4 },
         density: { value: 0.3 },
-        weight: { value: 0.7 },
+        weight: { value: 5 },
         samples: { value: 50 } 
       },
       vertexShader: this.getScriptContent('#shader-passthrough-vertex'),
@@ -613,36 +684,7 @@ class App {
     return new THREE.Mesh(mapBoundariesMesh.geometry);
   }
 
-  attachEvents() {
-    window.addEventListener("resize", this.updateSize.bind(this));
-    window.addEventListener("mousemove", this.onMouseMove.bind(this));
-    window.addEventListener("click", this.onMouseClick.bind(this));
-  }
-
-  onMouseMove(event) {
-    this.mouse.x = event.clientX / window.innerWidth * 2 - 1;
-    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  }
-
-  onMouseClick(event){
-    this.updateCameraTilt();
-  }
-  initHelpers() {
-    const { scene, camera, renderer } = this;
-    const c = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-
-    c.autoRotate = true;
-    c.autoRotateSpeed = 0.03;
-
-    c.enableDamping = true;
-    c.dampingFactor = 0.25;
-    c.minDistance = 1;
-    c.maxDistance = 1000;
-    this.orbitControls = c;
-
-    // this.axesHelper = new THREE.AxesHelper(500);
-    // scene.add(this.axesHelper);
-  }
+  
 
   updateSize() {
     const { renderer, camera, composer, occlusionComposer } = this;
@@ -659,7 +701,7 @@ class App {
   updateOcclusionIntensity(time) {
     const { uniforms: u } = this.occlusionPass;
     const n0 = (noise.perlin2(time * 0.0005, 0) + 4) * 0.5;
-    const n1 = (noise.perlin2(0, time * 0.0005) +1) * 0.5;
+    const n1 = (noise.perlin2(0, time * 0.0005) +1) * 0.8;
     u.exposure.value = THREE.Math.lerp(0.05, 0.21, n0);
     u.decay.value = THREE.Math.lerp(0.95, 0.98, n1);
     u.density.value = THREE.Math.lerp(0.2, 0.4, n0);
@@ -668,29 +710,32 @@ class App {
 
   updateLightPosition(time) {
     const { lightSphere } = this;
-    const n0 = (noise.perlin2(time * 0.0005, 0) + 1) * 0.5;
-    lightSphere.position.y = THREE.Math.lerp(-1, 1, n0);
+    // const n0 = (noise.perlin2(time * 0.0005, 0) + 1) * 0.5;
+    // lightSphere.position.y = THREE.Math.lerp(-1, 1, n0);
   }
 
   updateCameraTilt() {
     const { camera, mouse } = this;
-    TweenMax.to(this.camera.position, 10, {
-      x: mouse.x * 50,
-      y: mouse.y * 50,
-      z: mouse.x * mouse.y ,
+    TweenMax.to(this.camera.position, 100, {
+      x: mouse.x * 550,
+      y: mouse.y * 550,
+      z: mouse.x * mouse.y * 300 ,
     });
 
   }
 
   onFrame(time) {
     const { renderer, scene, camera, clock } = this;
+
     requestAnimationFrame(this.onFrame.bind(this));
     this.orbitControls.update();
     camera.layers.set(1);
     // this.updateCameraTilt();
     this.particles.update(clock.getDelta());
+    // this.rippleLines.update(clock.getDelta());
     this.updateOcclusionIntensity(time);
     this.updateLightPosition(time);
+    this.carmeraZoom(time);
     renderer.setClearColor(0x000000, 0);
     this.occlusionComposer.render();
     camera.layers.set(0);
