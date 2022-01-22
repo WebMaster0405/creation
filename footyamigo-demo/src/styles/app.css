@@ -1,0 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
+.footy-sidebar {
+    width: 256px;
+    box-shadow: 1px 0px 0px rgba(0, 0, 0, 0.1);
+    background-color: #FFFFFF !important;
+}
+
+.footy-sidebar-item .nav-link {
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: left;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #60685F;
+}
+
+.footy-sidebar-item .nav-link.active {
+    background-color: #60B15A;
+    color: #FFFFFF;
+}
+
+.footer-text {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: left;
+}
+
+
+/*--------------------------End of SideBar---------------------------------*/
+
+
+/*--------------------------UpComing---------------------------------*/
+
+.up-coming-header {
+    justify-content: space-between;
+}
+
+.up-coming-header .section {
+    justify-content: space-between;
+}
+
+.up-coming-title {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 48px;
+    line-height: 72px;
+    letter-spacing: -1px;
+    color: #222622;
+}
+
+.up-coming-description {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #60685F;
+    text-align: left;
+}
+
+.add-strategy-btn {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 10px 30px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+.helpLink {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 15px;
+    /* identical to box height */
+    display: flex;
+    align-items: center;
+    /* green */
+    color: #60B15A;
+}
+
+.strategy-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.strategy-header-text {
+    text-align: left;
+}
+
+.strategy-header-title {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 54px;
+    /* identical to box height */
+    letter-spacing: -1px;
+    /* text-1 */
+    color: #222622;
+}
+
+.strategy-header-action {
+    background: #EEF5ED;
+    color: #60685F;
+    border: 0px;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+    padding: 10px 24px;
+}
+
+.strategy-header-description {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 18px;
+    /* identical to box height */
+    text-align: left;
+    text-transform: capitalize;
+    /* orange */
+    color: #E4AF5E;
+}
+
+.strategy-body {
+    max-height: 600px;
+    overflow-y: scroll;
+    padding-right: 8px;
+}
+
+.strategy-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.strategy-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(-45deg, #fce7d1, #fcac05 90%);
+    border-radius: 8px;
+}
+
+.strategy-body::-webkit-scrollbar-track {
+    box-shadow: #dce6f9 0px 0px 5px inset;
+    border-radius: 10px;
+}
+
+.strategy-play-info-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.strategy-play-info-title {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    /* identical to box height */
+    text-transform: uppercase;
+    /* text-1 */
+    color: #222622;
+    opacity: 0.7;
+}
+
+.strategy-play-info-action {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    /* identical to box height */
+    text-align: right;
+    text-transform: uppercase;
+    /* orange */
+    color: #E4AF5E;
+}
+
+.strategy-play-info-item {
+    background: #FFFFFF;
+    border: 1px solid #F0F1F0;
+    padding: 10px 30px 15px 30px;
+}
+
+.play-time-level {
+    text-align: left;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 16px;
+    color: #60685F;
+}
+
+.play-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.play-content .team {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    color: #222622;
+    text-align: left;
+}
+
+.play-content .team-mark {
+    width: 20px;
+}
+
+.play-info-opt {
+    display: flex;
+    flex-direction: column;
+}
+
+.play-info-opt .opt-name {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #222622;
+}
+
+.play-info-opt .opt-value {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 21px;
+    color: #FFFFFF;
+}
+
+.play-info-opt .opt-arrow-btn {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+    background: #fff;
+    border: 1px solid #F0F1F0;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.07);
+}
+
+.opt-status {
+    width: 100px;
+    background: #EEF5ED;
+    border: 0px;
+    border-radius: 12px;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    color: #222622;
+}
+
+.up-coming-body .page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #60B15A;
+    border-color: #60B15A
+}
+
+.up-coming-body .page-item .page-link {
+    z-index: 3;
+    color: #60B15A;
+    background-color: #fff;
+    border-color: #60B15A
+}
+
+.up-coming-body .overlay-region {
+    width: 100%;
+    height: 200px;
+    /* background-color: #eef5ed; */
+}
+
+.hidden {
+    display: none;
+}
+
+
+/*-------------------------End of UpComing----------------------------*/
+
+.divider {
+    width: 100%;
+    height: 1px;
+    background: #F0F1F0;
+}
